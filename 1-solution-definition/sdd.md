@@ -1,13 +1,13 @@
 # Property Insurance Claims — Solution Definition Document (SDD)
 
-| | |
-|---|---|
-| **Owner** | Solutions Engineering, Apex Mutual Insurance Company |
-| **Version** | 1.0 |
-| **Effective date** | 26 May 2026 |
-| **Review cycle** | 12 months |
-| **Companion document** | `0-process-definition/pdd.md` (the business process this solution automates) |
-| **Downstream specifications** | `2-data-format/`, `2-case-management/`, `3-agents/`, `4-apps/` |
+|                                               |                                                                              |
+| --------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Owner**                                     | Solutions Engineering, Apex Mutual Insurance Company                         |
+| **Version**                                   | 1.0                                                                          |
+| **Effective date**                            | 26 May 2026                                                                  |
+| **Review cycle**                              | 12 months                                                                    |
+| **Companion document**                        | `0-process-definition/pdd.md` (the business process this solution automates) |
+| **Downstream specifications** (in subfolders) | `2-data-format/`<br>`2-case-management/`<br>`3-agents/`<br>`4-apps/`         |
 
 ---
 
@@ -15,38 +15,38 @@
 
 This document defines the **target solution architecture** for the Property Insurance Claims process specified in the PDD. It explains how each business stage, validation rule, and decision is realised on the **UiPath Agentic Automation Platform**.
 
-The SDD is the bridge between the business process (PDD) and the implementation artefacts (agent prompts, app code, case-management spec, data schemas). It does not prescribe code; it prescribes the components, contracts, and integrations that the downstream specifications must conform to.
+The SDD is the bridge between the business process definition document (PDD) and the implementation artefacts (agent prompts, app code, case-management spec, data schemas). It does not prescribe code; it prescribes the components, contracts, and integrations that the downstream specifications must conform to.
 
 ---
 
 ## 2. Solution objectives
 
-| # | Objective | How the solution meets it |
-|---|---|---|
-| 1 | Automate the adjudication of clean claims end to end | An agent pipeline runs the Eligibility, Coverage, Payout, Credibility, Decision, and Communication steps without manual intervention. |
-| 2 | Escalate ambiguous claims to a senior reviewer | When an agent recommends escalation, Maestro creates an Action Center task that surfaces the full analysis in a dedicated review app. |
-| 3 | Preserve a complete audit trail | Every agent output is persisted on the case record; every check is identifiable by a stable rule ID; reviewer notes are stored alongside agent reasoning. |
-| 4 | Render every agent's analysis through a single generic UI | Every agent emits the same **unified output envelope** (§6.3) so the apps render any agent's result through one shared component. |
-| 5 | Treat documents, currencies, and locales as data | The solution makes no assumptions about insurer, currency, locale, or date format; everything is derived from the documents and the policy in force. |
-| 6 | Keep humans in control | A Senior Claims Adjuster may continue or deny any escalated claim with full discretion; the system never refuses a human decision. |
+| #   | Objective                                                 | How the solution meets it                                                                                                                                 |
+| --- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Automate the adjudication of clean claims end to end      | An agent pipeline runs the Eligibility, Coverage, Payout, Credibility, Decision, and Communication steps without manual intervention.                     |
+| 2   | Escalate ambiguous claims to a senior reviewer            | When an agent recommends escalation, Maestro Case Management creates an Action Center task that surfaces the full analysis in a dedicated review app.     |
+| 3   | Preserve a complete audit trail                           | Every agent output is persisted on the case record; every check is identifiable by a stable rule ID; reviewer notes are stored alongside agent reasoning. |
+| 4   | Render every agent's analysis through a single generic UI | Every agent emits the same unified output envelope (§6.3) so the apps render any agent's result through one shared component.                             |
+| 5   | Treat documents, currencies, and locales as data          | The solution makes no assumptions about insurer, currency, locale, or date format; everything is derived from the documents and the policy in force.      |
+| 6   | Keep humans in control                                    | A Senior Claims Adjuster may continue or deny any escalated claim with full discretion; the system never refuses a human decision.                        |
 
 ---
 
 ## 3. UiPath platform component map
 
-| Capability | Role in this solution |
-|---|---|
-| **Document Understanding (IXP)** | Classifies the three claim documents; extracts structured data from the Claim Form, Insurance Policy, and Professional Incident Report. |
-| **AI Agents (Agent Builder)** | Hosts the seven agents that perform eligibility, validation, coverage, payout, credibility, decision, and communication. |
-| **Maestro (Process Orchestrator)** | Drives the case lifecycle. Owns stage transitions, the parallel block in Data Analysis, the escalation gates, and the wait points for the secondary stages. |
-| **Case Management (Data Service / Data Fabric entity)** | Backs each claim with a persistent record (`PropertyClaimCase`). Holds header fields, lifecycle state, agent outputs, attachments, and prior-claims data. |
-| **Action Center** | Surfaces escalated claims to the Senior Claims Adjuster as tasks bound to the **Claim Review** Coded Action App. |
-| **Coded Apps** | Two custom React applications: a **Process App** (operations dashboard) and an **Action App** (single-claim review form). Both consume a shared component library so that any agent's output renders identically across both surfaces. |
-| **Storage Buckets** | Store the three PDFs per claim (policy, claim form, assessor report). |
-| **Integration Service** | Delivers email notifications to the claimant via a managed email connector. |
-| **Unattended Robots (RPA)** | Intake automation (document arrival, policy lookup, prior-claims retrieval), email dispatch, payment-instruction posting, and case archival. |
-| **AI Trust Layer** | Governs agent prompt/response handling, PII redaction policies, and model usage telemetry. |
-| **Orchestrator** | Hosts robots, queues, and storage bucket access; surfaces job attachments. |
+| Capability                                              | Role in this solution                                                                                                                                                                                                            |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Document Understanding (IXP)**                        | Classifies the three claim documents; extracts structured data from the Claim Form, Insurance Policy, and Professional Incident Report.                                                                                          |
+| **AI Agents (Agent Builder)**                           | Hosts agents that perform eligibility, validation, coverage, payout, credibility, decision, and communication.                                                                                                                   |
+| **Maestro Case Management (Process Orchestrator)**      | Drives the case lifecycle. Owns stage transitions, the parallel block in Data Analysis, the escalation gates, and the wait points for the secondary stages.                                                                      |
+| **Case Management (Data Service / Data Fabric entity)** | Backs each claim with a persistent record (`PropertyClaimCase`). Holds header fields, lifecycle state, agent outputs, attachments, and prior-claims data.                                                                        |
+| **Action Center**                                       | Surfaces escalated claims to the Senior Claims Adjuster as tasks bound to the **Claim Review** Coded Action App.                                                                                                                 |
+| **Coded Apps**                                          | Two custom applications: a **Process App** (operations dashboard) and an **Action App** (single-claim review form). Both consume a shared component library so that any agent's output renders identically across both surfaces. |
+| **Storage Buckets**                                     | Store the three PDFs per claim (policy, claim form, assessor report).                                                                                                                                                            |
+| **Integration Service**                                 | Delivers email notifications to the claimant via a managed email connector.                                                                                                                                                      |
+| **Unattended Robots (RPA)**                             | Intake automation (document arrival, policy lookup, prior-claims retrieval), email dispatch, payment-instruction posting, and case archival.                                                                                     |
+| **AI Trust Layer**                                      | Governs agent prompt/response handling, PII redaction policies, and model usage telemetry.                                                                                                                                       |
+| **Orchestrator**                                        | Hosts robots, queues, and storage bucket access; surfaces job attachments.                                                                                                                                                       |
 
 ---
 
@@ -57,64 +57,64 @@ The SDD is the bridge between the business process (PDD) and the implementation 
    (Email)                        (Report upload)             (Process App)
        │                               │                           │
        ▼                               ▼                           │
-   ┌────────────────────────────────────────────────────┐         │
-   │            Intake Robot (Unattended)                │         │
-   │  • Receives claim package (FNOL + policy ref +      │         │
-   │    incident report when available)                  │         │
-   │  • Uploads PDFs to Storage Buckets                  │         │
-   │  • Looks up policy and prior claims                 │         │
-   │  • Creates PropertyClaimCase                        │         │
-   └────────────────────┬───────────────────────────────┘         │
+   ┌────────────────────────────────────────────────────┐          │
+   │            Intake Robot (Unattended)               │          │
+   │  • Receives claim package (FNOL + policy ref +     │          │
+   │    incident report when available)                 │          │
+   │  • Uploads PDFs to Storage Buckets                 │          │ 
+   │  • Looks up policy and prior claims                │          │
+   │  • Creates PropertyClaimCase                       │          │
+   └────────────────────┬───────────────────────────────┘          │
                         ▼                                          │
    ┌─────────────────────────────────────────────┐                 │
-   │    Document Understanding (IXP)              │                 │
-   │  • Classify document types                   │                 │
-   │  • Extract structured fields                 │                 │
-   └─────────────────────┬────────────────────────┘                 │
-                         ▼                                          │
+   │    Document Understanding (IXP)             │                 │
+   │  • Classify document types                  │                 │
+   │  • Extract structured fields                │                 │
+   └─────────────────────┬───────────────────────┘                 │
+                         ▼                                         │
    ┌─────────────────────────────────────────────────────────────┐ │
    │              Maestro Process Orchestrator                   │ │
-   │                                                              │ │
-   │   ┌────────────┐                                             │ │
-   │   │ Agent 01   │ Claims Eligibility ─── 5 threshold checks   │ │
-   │   └─────┬──────┘                                             │ │
-   │         │  (escalate) ─► Action Center (Claim Review,        │ │
-   │         │                  eligibility trigger)              │ │
-   │         ▼                                                     │ │
-   │   ┌────────────┐                                             │ │
-   │   │ Agent 1a   │ Validate Assessment Report                  │ │
-   │   └─────┬──────┘                                             │ │
-   │         ▼                                                     │ │
-   │   ┌────────────┬────────────┬────────────┐                   │ │
-   │   │ Agent 02   │ Agent 03   │ Agent 04   │  parallel block   │ │
-   │   │ Coverage   │ Payout     │ Credibility│                   │ │
-   │   └─────┬──────┴─────┬──────┴─────┬──────┘                   │ │
-   │         └────────────┼────────────┘                          │ │
-   │                      ▼                                        │ │
-   │   ┌────────────┐                                             │ │
-   │   │ Agent 05   │ Decision                                     │ │
-   │   └─────┬──────┘                                             │ │
-   │         │  (escalate) ─► Action Center (Claim Review,        │ │
-   │         │                  decision trigger)                 │ │
-   │         ▼                                                     │ │
-   │   ┌────────────┐                                             │ │
-   │   │ Agent 06   │ Claim Response — letter                     │ │
-   │   └────────────┘                                             │ │
+   │                                                             │ │
+   │   ┌────────────┐                                            │ │
+   │   │ Agent 01   │ Claims Eligibility ── 5 threshold checks   │ │
+   │   └─────┬──────┘                                            │ │
+   │         │  (escalate) ─► Action Center (Claim Review,       │ │
+   │         │                  eligibility trigger)             │ │
+   │         ▼                                                   │ │
+   │   ┌────────────┐                                            │ │
+   │   │ Agent 1a   │ Validate Assessment Report                 │ │
+   │   └─────┬──────┘                                            │ │
+   │         ▼                                                   │ │
+   │   ┌────────────┬────────────┬────────────┐                  │ │
+   │   │ Agent 02   │ Agent 03   │ Agent 04   │  parallel block  │ │
+   │   │ Coverage   │ Payout     │ Credibility│                  │ │
+   │   └─────┬──────┴─────┬──────┴─────┬──────┘                  │ │
+   │         └────────────┼────────────┘                         │ │
+   │                      ▼                                      │ │
+   │   ┌────────────┐                                            │ │
+   │   │ Agent 05   │ Decision                                   │ │
+   │   └─────┬──────┘                                            │ │
+   │         │  (escalate) ─► Action Center (Claim Review,       │ │
+   │         │                  decision trigger)                │ │
+   │         ▼                                                   │ │
+   │   ┌────────────┐                                            │ │
+   │   │ Agent 06   │ Claim Response — letter                    │ │
+   │   └────────────┘                                            │ │
    └──────────────────────┬──────────────────────────────────────┘ │
-                          ▼                                         │
-   ┌──────────────────────────────────────┐                         │
-   │  Settlement Robot (Unattended)        │                         │
-   │  • Sends letter email (Integration    │                         │
-   │    Service)                           │                         │
-   │  • Posts payment instruction to       │                         │
-   │    finance queue                      │                         │
-   │  • Updates case status to closed      │                         │
-   └──────────────────────────────────────┘                         │
-                                                                    │
+                          ▼                                        │
+   ┌──────────────────────────────────────┐                        │
+   │  Settlement Robot (Unattended)       │                        │
+   │  • Sends letter email (Integration   │                        │
+   │    Service)                          │                        │
+   │  • Posts payment instruction to      │                        │
+   │    finance queue                     │                        │
+   │  • Updates case status to closed     │                        │
+   └──────────────────────────────────────┘                        │
+                                                                   │
    ┌──────────────────────────────────────────────────────────┐    │
-   │           Case Management Entity (Data Service)           │ ◄──┘
-   │           PropertyClaimCase — single record per claim     │
-   │           Header fields, agent outputs, attachments       │
+   │           Case Management Entity (Data Service)          │ ◄──┘
+   │           PropertyClaimCase — single record per claim    │
+   │           Header fields, agent outputs, attachments      │
    └──────────────────────────────────────────────────────────┘
                           ▲
                           │ (writes from every component)
@@ -122,7 +122,7 @@ The SDD is the bridge between the business process (PDD) and the implementation 
    Cross-cutting:
    • Storage Buckets ─── policy / claim form / assessor report PDFs
    • AI Trust Layer ─── governs agent prompt/response, PII
-   • OAuth (External App, PKCE) ─── authenticates the two coded apps
+   • OAuth (External App) ─── authenticates the two coded apps
 ```
 
 ---
@@ -133,33 +133,33 @@ This section maps every PDD stage onto the UiPath components that realise it. Nu
 
 ### 5.1 Stage 1 — Intake
 
-| Aspect | Mapping |
-|---|---|
-| **Trigger** | Claim packet arrives via email inbox monitored by an unattended robot, or by direct upload through Apex Mutual's claimant portal. |
-| **Components** | Unattended Robot (intake) → IXP → Data Service → Storage Buckets |
-| **Sequence** | (1) Robot picks up the package; (2) Storage Buckets receive the PDFs; (3) IXP classifies and extracts each document; (4) Robot creates the `PropertyClaimCase` record with extracted header data; (5) Robot looks up the policy by ID and the claimant's prior claims and writes them to the case; (6) Robot sends the acknowledgement email via Integration Service. |
-| **Maestro role** | Maestro starts the case journey at stage `Intake` and transitions it to `Eligibility Analysis` on completion. |
-| **Outputs persisted** | Header fields; `claimFormPdf`, `policyPdf`, `assessmentReportPdf` (when present); `out_ClaimIXPDataJSON`; `priorClaims[]`. |
+| Aspect                | Mapping                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Trigger**           | Claim packet arrives via email inbox monitored by an unattended robot, or by direct upload through Apex Mutual's claimant portal.                                                                                                                                                                                                                                 |
+| **Components**        | Unattended Robot (intake) → IXP & Storage Buckets                                                                                                                                                                                                                                                                                                                 |
+| **Sequence**          | (1) Robot picks up the package; (2) Storage Buckets receive the PDFs; (3) IXP classifies and extracts documents; (4) Robot creates the `PropertyClaimCase` record with extracted header data; (5) Robot looks up the policy by ID and the claimant's prior claims and writes them to the case; (6) Robot sends the acknowledgement email via Integration Service. |
+| **Maestro role**      | Maestro starts the case journey at stage `Intake` and transitions it to `Eligibility Analysis` on completion.                                                                                                                                                                                                                                                     |
+| **Outputs persisted** | Header fields; `claimFormPdf`, `policyPdf`, `assessmentReportPdf` (when present); `out_ClaimIXPDataJSON`; `priorClaims[]`.                                                                                                                                                                                                                                        |
 
 ### 5.2 Stage 2 — Eligibility Analysis
 
-| Aspect | Mapping |
-|---|---|
-| **Component** | Agent 01 (Claims Eligibility) |
-| **Inputs** | `in_PolicyID`, `in_ClaimIXPDataJSON`, `in_PolicyPDF` |
-| **Outputs persisted** | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_EligibilityChecksJSON`, `out_EligibilityAnalysisSummary` |
-| **Escalation path** | When the agent returns `recommendation = escalate`, Maestro creates an Action Center task targeting the **Claim Review** Coded Action App with `triggerStage = "eligibility"`. The reviewer's outcome (`continue` or `deny`) is written back to the case as `out_EscalationDecision_Eligibility`. |
-| **Auto-deny path** | When the agent returns `recommendation = deny`, Maestro transitions the case directly to `Settlement & Closure`. |
-| **Email** | The robot sends a status email after Agent 01 completes. |
+| Aspect                | Mapping                                                                                                                                                                                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Component**         | Claims Eligibility Agent                                                                                                                                                                                                                                                                          |
+| **Inputs**            | `in_PolicyID`, `in_ClaimIXPDataJSON`, `in_PolicyPDF`                                                                                                                                                                                                                                              |
+| **Outputs persisted** | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_EligibilityChecksJSON`, `out_EligibilityAnalysisSummary`                                                                                                                                                                                          |
+| **Escalation path**   | When the agent returns `recommendation = escalate`, Maestro creates an Action Center task targeting the **Claim Review** Coded Action App with `triggerStage = "eligibility"`. The reviewer's outcome (`continue` or `deny`) is written back to the case as `out_EscalationDecision_Eligibility`. |
+| **Auto-deny path**    | When the agent returns `recommendation = deny`, Maestro transitions the case directly to `Settlement & Closure`.                                                                                                                                                                                  |
+| **Email**             | The robot sends a status email after Agent Eligibility Agent completes, if decision is that claim is eligible for analysis.                                                                                                                                                                       |
 
 ### 5.3 Awaiting Assessment (Secondary stage)
 
-| Aspect | Mapping |
-|---|---|
-| **Component** | Unattended Robot (assessment intake) + Storage Buckets |
-| **Trigger** | Eligibility passed and `assessmentReportPdf` is not present on the case. |
+| Aspect        | Mapping                                                                                                                                                                                                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Component** | Unattended Robot (assessment intake) + Storage Buckets                                                                                                                                                                                                                              |
+| **Trigger**   | Eligibility passed and `assessmentReportPdf` is not present on the case.                                                                                                                                                                                                            |
 | **Behaviour** | The robot issues the inspection request email to the assessor panel, monitors the assessor inbox / portal upload for the report PDF, uploads it to the `Assessor Reports` bucket, and updates the case attachment field. Maestro then transitions the case back to `Data Analysis`. |
-| **Timer** | Maestro maintains a configurable timer (default ten business days) after which the case is flagged for follow-up. |
+| **Timer**     | Maestro maintains a configurable timer (default ten business days) after which the case is flagged for follow-up.                                                                                                                                                                   |
 
 ### 5.4 Details Inquiry (Secondary stage)
 
@@ -173,32 +173,32 @@ This section maps every PDD stage onto the UiPath components that realise it. Nu
 
 ### 5.5 Stage 3 — Data Analysis
 
-| Aspect | Mapping |
-|---|---|
-| **Entry condition** | Eligibility confirmed and `assessmentReportPdf` present. |
-| **Sub-step 1 — Validate** | Agent 1a runs against the assessor PDF, the policy data, and the eligibility result. Persists `out_AssessmentReportJSON`, `out_AssessmentReportValidationJSON`, `out_AssessmentReportAnalysisSummary`. |
-| **Sub-step 2 — Parallel** | Maestro spawns Agents 02, 03, and 04 in parallel. Each receives the same inputs (claim data, policy data, validated assessment, eligibility result, prior claims). Each emits its own check set and recommendation. |
-| **Sub-step 3 — Synthesise** | Agent 05 consumes all four upstream outputs and produces `out_FinalDecision` + `out_DecisionJSON`. |
-| **Escalation path** | If `out_FinalDecision = escalate`, Maestro creates an Action Center task targeting **Claim Review** with `triggerStage = "decision"`. Otherwise the case transitions directly to `Settlement & Closure`. |
-| **Email** | The robot sends a status email after Agent 05 completes. |
+| Aspect                      | Mapping                                                                                                                                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Entry condition**         | Eligibility confirmed and `assessmentReportPdf` present.                                                                                                                                                            |
+| **Sub-step 1 — Validate**   | Agent 1a runs against the assessor PDF, the policy data, and the eligibility result. Persists `out_AssessmentReportJSON`, `out_AssessmentReportValidationJSON`, `out_AssessmentReportAnalysisSummary`.              |
+| **Sub-step 2 — Parallel**   | Maestro spawns Agents 02, 03, and 04 in parallel. Each receives the same inputs (claim data, policy data, validated assessment, eligibility result, prior claims). Each emits its own check set and recommendation. |
+| **Sub-step 3 — Synthesise** | Decision Agent 05 consumes all four upstream outputs and produces `out_FinalDecision` + `out_DecisionJSON`.                                                                                                         |
+| **Escalation path**         | If `out_FinalDecision = escalate`, Maestro creates an Action Center task targeting **Claim Review** with `triggerStage = "decision"`. Otherwise the case transitions directly to `Settlement & Closure`.            |
+| **Email**                   | The robot sends a status email after Decision Agent 05 completes.                                                                                                                                                   |
 
 ### 5.6 Stage 4 — Claim Review
 
-| Aspect | Mapping |
-|---|---|
-| **Component** | Action Center task bound to the **Claim Review** Coded Action App. |
-| **Input payload** | Full agent output set (eligibility, assessment, coverage, payout, credibility, decision) + the three PDFs as job attachments + the `triggerStage` flag. |
-| **Reviewer outcomes** | `continue` or `deny`, plus optional `reviewerNotes` and `reviewedAt`. |
-| **Authority** | Fully open. The reviewer may continue a claim the agents wanted to deny and may deny a claim the agents wanted to approve. |
-| **Persistence** | `out_EscalationDecision_Decision` and `out_EscalationComment_Decision` are written to the case. |
+| Aspect                | Mapping                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Component**         | Action Center task bound to the **Claim Review** Coded Action App.                                                                                      |
+| **Input payload**     | Full agent output set (eligibility, assessment, coverage, payout, credibility, decision) + the three PDFs as job attachments + the `triggerStage` flag. |
+| **Reviewer outcomes** | `continue` or `deny`, plus optional `reviewerNotes` and `reviewedAt`.                                                                                   |
+| **Authority**         | Fully open. The reviewer may continue a claim the agents wanted to deny and may deny a claim the agents wanted to approve.                              |
+| **Persistence**       | `out_EscalationDecision_Decision` and `out_EscalationComment_Decision` are written to the case.                                                         |
 
 ### 5.7 Stage 5 — Settlement and Closure
 
-| Aspect | Mapping |
-|---|---|
-| **Component** | Agent 06 (Claim Response) → Unattended Robot (settlement) → Integration Service → Orchestrator queue |
-| **Sequence** | (1) Agent 06 drafts the decision letter incorporating any reviewer comment; (2) the robot sends the letter by email via Integration Service to the address on file; (3) for approvals and partial approvals, the robot posts a payment instruction to the **Finance Payout Queue** in Orchestrator; (4) the robot updates the case status to `closed` and archives the record. |
-| **Persistence** | `out_ClaimResponseJSON` (letter text + metadata) + `out_ClaimResponseAnalysisSummary`; case `status = approved \| partial_approved \| denied \| closed`. |
+| Aspect          | Mapping                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Component**   | Agent 06 (Claim Response Agent) → Unattended Robot (settlement) → Integration Service → Orchestrator queue                                                                                                                                                                                                                                                                                    |
+| **Sequence**    | (1) Claim Response Agent 06 drafts the decision letter incorporating any reviewer comment; (2) the robot sends the letter by email via Integration Service to the address on file; (3) for approvals and partial approvals, the robot posts a payment instruction to the **Finance Payout Queue** in Orchestrator; (4) the robot updates the case status to `closed` and archives the record. |
+| **Persistence** | `out_ClaimResponseJSON` (letter text + metadata) + `out_ClaimResponseAnalysisSummary`; case `status = approved \| partial_approved \| denied \| closed`.                                                                                                                                                                                                                                      |
 
 ---
 
@@ -224,24 +224,28 @@ Detailed prompts, payload schemas, and worked examples live in `3-agents/`.
 Intake (RPA + IXP)
    │  in_PolicyID, in_ClaimIXPDataJSON, in_PolicyPDF
    ▼
-[01] Claims Eligibility ──► out_ClaimDataJSON, out_PolicyDataJSON,
-                            out_EligibilityChecksJSON, out_EligibilityAnalysisSummary
+[01] Claims Eligibility ──► out_ClaimDataJSON, 
+							out_PolicyDataJSON,
+	                        out_EligibilityChecksJSON,
+	                        out_EligibilityAnalysisSummary
+   │
    │  (proceed_to_coverage_analysis)
    ▼
 [1a] Validate Assessment Report
                         ──► out_AssessmentReportJSON,
-                            out_AssessmentReportValidationJSON,
+						    out_AssessmentReportValidationJSON,
                             out_AssessmentReportAnalysisSummary
    │
    ▼  (Maestro fork)
-┌─────────────────── parallel block ───────────────────┐
-[02] Coverage Analysis  ──► out_CoverageChecksJSON
-[03] Payout Calculation ──► out_PayoutChecksJSON
-[04] Credibility Asmt   ──► out_CredibilityChecksJSON
-└──────────────────────────────────────────────────────┘
+┌────────────────────── parallel block ──────────────────────┐
+[02] Coverage Analysis          ──► out_CoverageChecksJSON
+[03] Payout Calculation.        ──► out_PayoutChecksJSON
+[04] Credibility Assessmentmt   ──► out_CredibilityChecksJSON
+└────────────────────────────────────────────────────────────┘
    │  (Maestro join)
    ▼
-[05] Decision           ──► out_FinalDecision, out_DecisionJSON
+[05] Decision           ──► out_FinalDecision
+							out_DecisionJSON
    │
    │  (auto path: approve / partial / deny)
    │  (escalate path: Action Center → reviewer outcome)
@@ -295,12 +299,12 @@ Notes:
 
 ### 6.4 Model selection and the AI Trust Layer
 
-| Concern | Approach |
-|---|---|
-| **Model selection** | Each agent is configured with a model appropriate to its task in Agent Builder. Eligibility and Decision are deterministic and use a small reasoning model; Coverage and Credibility benefit from a stronger reasoning model; Claim Response is drafting work and uses a model tuned for tone. Specific model IDs are an environment configuration. |
-| **PII handling** | The AI Trust Layer is enabled for all agents. Claimant PII (name, address, email, phone) is allowed through because it is required for adjudication; financial account details and identifiers are out of scope. |
-| **Prompt versioning** | Agent prompts in `3-agents/` are the source of truth. Maestro pins the agent version at deployment time. |
-| **Telemetry** | Token usage, latency, and model identity are written to AI Trust Layer logs and surfaced in the Process App via a future Timeline view. |
+| Concern               | Approach                                                                                                                                                                                                                                                                                                                                            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Model selection**   | Each agent is configured with a model appropriate to its task in Agent Builder. Eligibility and Decision are deterministic and use a small reasoning model; Coverage and Credibility benefit from a stronger reasoning model; Claim Response is drafting work and uses a model tuned for tone. Specific model IDs are an environment configuration. |
+| **PII handling**      | The AI Trust Layer is enabled for all agents. Claimant PII (name, address, email, phone) is allowed through because it is required for adjudication; financial account details and identifiers are out of scope.                                                                                                                                    |
+| **Prompt versioning** | Agent prompts in `3-agents/` are the source of truth. Maestro pins the agent version at deployment time.                                                                                                                                                                                                                                            |
+| **Telemetry**         | Token usage, latency, and model identity are written to AI Trust Layer logs and surfaced in the Process App via a future Timeline view.                                                                                                                                                                                                             |
 
 ### 6.5 Where the detail lives
 
@@ -340,22 +344,22 @@ escalated | approved | partial_approved | denied | closed
 
 ### 7.4 Key fields (high-level)
 
-| Group | Fields |
-|---|---|
-| **Header (denormalised)** | `claimId` (key), `policyId`, `claimantName`, `currency`, `incidentType`, `incidentDate`, `dateOfSubmission`, `totalClaimAmount` |
-| **Lifecycle** | `currentStage`, `status`, `updatedAt`, `reviewRequired`, `triggerStage` |
-| **Attachments** | `claimFormPdf`, `policyPdf`, `assessmentReportPdf` (each as an attachment reference resolved against Storage Buckets) |
-| **Reference data** | `priorClaims[]` (denormalised summary of the claimant's prior claims) |
-| **Intake outputs** | `out_ClaimIXPDataJSON` |
-| **Agent 01** | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_EligibilityChecksJSON`, `out_EligibilityAnalysisSummary`, `out_isEligible`, `out_isComplete` |
-| **Agent 1a** | `out_AssessmentReportJSON`, `out_AssessmentReportValidationJSON`, `out_AssessmentReportAnalysisSummary` |
-| **Agent 02** | `out_CoverageChecksJSON`, `out_CoverageAnalysisSummary` |
-| **Agent 03** | `out_PayoutChecksJSON`, `out_PayoutAnalysisSummary` |
-| **Agent 04** | `out_CredibilityChecksJSON`, `out_CredibilityAnalysisSummary` |
-| **Agent 05** | `out_FinalDecision`, `out_DecisionJSON`, `out_DecisionAnalysisSummary` |
-| **Agent 06** | `out_ClaimResponseJSON`, `out_ClaimResponseAnalysisSummary` |
-| **Human review** | `out_EscalationDecision_Eligibility`, `out_EscalationComment_Eligibility`, `out_EscalationDecision_Decision`, `out_EscalationComment_Decision` |
-| **Inquiry** | `out_DetailsInquiryJSON` |
+| Group                     | Fields                                                                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Header (denormalised)** | `claimId` (key), `policyId`, `claimantName`, `currency`, `incidentType`, `incidentDate`, `dateOfSubmission`, `totalClaimAmount`                |
+| **Lifecycle**             | `currentStage`, `status`, `updatedAt`, `reviewRequired`, `triggerStage`                                                                        |
+| **Attachments**           | `claimFormPdf`, `policyPdf`, `assessmentReportPdf` (each as an attachment reference resolved against Storage Buckets)                          |
+| **Reference data**        | `priorClaims[]` (denormalised summary of the claimant's prior claims)                                                                          |
+| **Intake outputs**        | `out_ClaimIXPDataJSON`                                                                                                                         |
+| **Agent 01**              | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_EligibilityChecksJSON`, `out_EligibilityAnalysisSummary`, `out_isEligible`, `out_isComplete`   |
+| **Agent 1a**              | `out_AssessmentReportJSON`, `out_AssessmentReportValidationJSON`, `out_AssessmentReportAnalysisSummary`                                        |
+| **Agent 02**              | `out_CoverageChecksJSON`, `out_CoverageAnalysisSummary`                                                                                        |
+| **Agent 03**              | `out_PayoutChecksJSON`, `out_PayoutAnalysisSummary`                                                                                            |
+| **Agent 04**              | `out_CredibilityChecksJSON`, `out_CredibilityAnalysisSummary`                                                                                  |
+| **Agent 05**              | `out_FinalDecision`, `out_DecisionJSON`, `out_DecisionAnalysisSummary`                                                                         |
+| **Agent 06**              | `out_ClaimResponseJSON`, `out_ClaimResponseAnalysisSummary`                                                                                    |
+| **Human review**          | `out_EscalationDecision_Eligibility`, `out_EscalationComment_Eligibility`, `out_EscalationDecision_Decision`, `out_EscalationComment_Decision` |
+| **Inquiry**               | `out_DetailsInquiryJSON`                                                                                                                       |
 
 The detailed field list, types, and Data Service column mapping live in `2-case-management/`.
 
@@ -612,18 +616,18 @@ Every check carried out by an agent has a stable rule ID (E-1, C-3, P-7, CR-2, D
 
 These items are recommended for sign-off before downstream artefacts are locked.
 
-| # | Decision | Recommendation |
-|---|---|---|
-| **A1** | IXP extractor type for the Policy and Incident Report | Generative Extractor — no model training overhead, tolerates document variation |
-| **A2** | Email provider through Integration Service | Microsoft 365 / Outlook connector for managed delivery; SMTP fallback for environments without a tenant mailbox |
-| **A3** | LLM model assignment per agent | Eligibility and Decision: a small reasoning model; Coverage and Credibility: a stronger reasoning model; Claim Response: a model tuned for drafting tone. Specific IDs are environment-configurable. |
-| **A4** | Date storage on the case entity | Always ISO 8601; agents continue to emit `DD/MM/YYYY` in document-derived JSON because that is what the source documents carry; the case-write layer normalises before persistence |
-| **A5** | Currency on the case entity | Denormalised header field `currency` populated at Intake from the Policy data. Agents continue to source it from the policy at reasoning time. |
-| **A6** | `out_DetailsInquiryJSON` shape | A single envelope-shaped object that records originating stage, requested information, sent / response / timeout timestamps. Defined in `2-data-format/`. |
-| **A7** | Process App write-back | Read-only in v1. A subsequent release may add a "Reopen case" action restricted to Claims Operations Managers. |
-| **A8** | Action App contract for human override | 2-way (`continue` / `deny`) with free-text `reviewerNotes`. Notes carry any nuance that a 3-way enum would have expressed. |
-| **A9** | Storage Bucket access pattern | Apps read by short-lived signed URLs (`GetReadUri`); buckets are not directly exposed. |
-| **A10** | Audit export | A "Download audit record" action in the Process App produces a single JSON containing every check, summary, decision, and reviewer note for the case. |
+| #       | Decision                                              | Recommendation                                                                                                                                                                                       |
+| ------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A1**  | IXP extractor type for the Policy and Incident Report | Generative Extractor — no model training overhead, tolerates document variation                                                                                                                      |
+| **A2**  | Email provider through Integration Service            | Microsoft 365 / Outlook connector for managed delivery; SMTP fallback for environments without a tenant mailbox                                                                                      |
+| **A3**  | LLM model assignment per agent                        | Eligibility and Decision: a small reasoning model; Coverage and Credibility: a stronger reasoning model; Claim Response: a model tuned for drafting tone. Specific IDs are environment-configurable. |
+| **A4**  | Date storage on the case entity                       | Always ISO 8601; agents continue to emit `DD/MM/YYYY` in document-derived JSON because that is what the source documents carry; the case-write layer normalises before persistence                   |
+| **A5**  | Currency on the case entity                           | Denormalised header field `currency` populated at Intake from the Policy data. Agents continue to source it from the policy at reasoning time.                                                       |
+| **A6**  | `out_DetailsInquiryJSON` shape                        | A single envelope-shaped object that records originating stage, requested information, sent / response / timeout timestamps. Defined in `2-data-format/`.                                            |
+| **A7**  | Process App write-back                                | Read-only in v1. A subsequent release may add a "Reopen case" action restricted to Claims Operations Managers.                                                                                       |
+| **A8**  | Action App contract for human override                | 2-way (`continue` / `deny`) with free-text `reviewerNotes`. Notes carry any nuance that a 3-way enum would have expressed.                                                                           |
+| **A9**  | Storage Bucket access pattern                         | Apps read by short-lived signed URLs (`GetReadUri`); buckets are not directly exposed.                                                                                                               |
+| **A10** | Audit export                                          | A "Download audit record" action in the Process App produces a single JSON containing every check, summary, decision, and reviewer note for the case.                                                |
 
 ---
 

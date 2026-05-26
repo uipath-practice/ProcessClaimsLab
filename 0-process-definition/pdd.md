@@ -61,39 +61,39 @@ The process exists to ensure that:
 
 Every claim must be supported by three documents:
 
-| Document | Source | Purpose |
-|---|---|---|
-| **First Notice of Loss (FNOL)** | Claimant | Reports the incident, identifies the claimant and the insured property, describes the damage, lists each damaged item with an estimated cost, and states the total claimed amount. |
-| **Insurance Policy** | Apex Mutual records | Defines the coverage limits, sublimits, deductible, exclusions, endorsements, and special conditions in force at the time of the loss. |
-| **Professional Incident Report** | Independent licensed assessor | Documents the assessor's on-site observations, determines the cause of loss, describes the full scope of damage, and provides an independent repair estimate. |
+| Document                         | Source                        | Purpose                                                                                                                                                                                                                                                                |
+| -------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **First Notice of Loss (FNOL)**  | Claimant                      | Reports the incident, identifies the claimant and the insured property, describes the damage, lists each damaged item with an estimated cost, and states the total claimed amount.                                                                                     |
+| **Insurance Policy**             | Apex Mutual records           | Defines the coverage, limits and sublimits, deductible, exclusions, endorsements, and special conditions in force at the time of the loss.                                                                                                                             |
+| **Professional Incident Report** | Independent licensed assessor | Documents the assessor's on-site observations, determines the cause of loss, describes the full scope of damage, and provides an independent repair estimate. Note: this document is optional with initial FNOL submission, but is mandatory for final claim decision. |
 
-A claim cannot progress past Eligibility Analysis until all three documents are on file.
+A claim cannot progress past **Eligibility Analysis** until all three documents are on file.
 
 ### 4.2 Reference data
 
-| Reference | Purpose |
-|---|---|
-| **Prior claims history** | All prior claims filed by the same claimant against the same or any other property. Used to spot repeated incident types, frequency patterns, or escalating claim amounts. |
-| **Policy schedule** | The detailed coverage limits, sublimits, deductible amounts, and active endorsements. Embedded in the Insurance Policy document. |
+| Reference                | Purpose                                                                                                                                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Prior claims history** | All prior claims filed by the same claimant against the same or any other property. Used to spot duplicate claims, repeated incident types, frequency patterns, or escalating claim amounts. |
+| **Policy schedule**      | The detailed coverage limits, sublimits, deductible amounts, and active endorsements. Embedded in the Insurance Policy document.                                                             |
 
 ### 4.3 Outputs
 
-| Output | Recipient |
-|---|---|
-| **Decision letter** (approval, partial approval, or denial) | Claimant |
-| **Payment instruction** (approvals and partial approvals) | Finance |
+| Output                                                                                        | Recipient                   |
+| --------------------------------------------------------------------------------------------- | --------------------------- |
+| **Decision letter** (approval, partial approval, or denial)                                   | Claimant                    |
+| **Payment instruction** (approvals and partial approvals)                                     | Finance                     |
 | **Audit record** (every check performed, supporting evidence, final decision, reviewer notes) | Compliance, internal review |
 
-All communication with the claimant — acknowledgements, status updates, inspection notices, and decision letters — is delivered by email to the address on file.
+All communication with the claimant (acknowledgements, status updates, inspection notices, and decision letters) is delivered by email to the email address on file.
 
 ---
 
 ## 5. Process lifecycle
 
-A claim moves through five primary stages along the happy path. Two **secondary (conditional) stages** may pause the primary flow when additional information or activity is required from outside the Claims Department:
+A claim moves through five primary stages. Two **secondary (conditional) stages** may pause the primary flow when additional information or activity is required from outside the Claims Department:
 
-- **Awaiting Assessment** — the claim is held while an independent assessor inspects the property and produces the Professional Incident Report.
-- **Details Inquiry** — the claim is held while additional information is being requested from the claimant.
+- **Awaiting Assessment**: the claim is held while an independent assessor inspects the property and produces the Professional Incident Report.
+- **Details Inquiry**: the claim is held while additional information is being requested from the claimant.
 
 A claim may pass through neither, one, or both secondary stages depending on the circumstances of the case.
 
@@ -103,7 +103,7 @@ A claim may pass through neither, one, or both secondary stages depending on the
 PRIMARY PATH                              SECONDARY (CONDITIONAL) STAGES
 ─────────────                             ─────────────────────────────────
 1. Intake
-       │                                  • Awaiting Assessment
+       │                                  • Awaiting Assessment:
        ▼                                    Pause for the Professional
 2. Eligibility Analysis                     Incident Report. Entered
        │                                    after Eligibility Analysis,
@@ -112,7 +112,7 @@ PRIMARY PATH                              SECONDARY (CONDITIONAL) STAGES
 3. Data Analysis                            report has not yet been
        │                                    received. Exits on receipt.
        │ (escalate)
-       ▼                                  • Details Inquiry
+       ▼                                  • Details Inquiry:
 4. Claim Review                             Pause for additional
        │                                    information from the
        ▼                                    claimant. May be entered
@@ -122,17 +122,21 @@ PRIMARY PATH                              SECONDARY (CONDITIONAL) STAGES
                                             responds.
 ```
 
+Finally, there are three secondary stages to represent the decision outcome of the case: 
+- **Approved**
+- **Partially Approved**
+- **Rejected**
 ### 5.2 Stage summary
 
-| Stage | Type | Purpose | Typical duration |
-|---|---|---|---|
-| 1. Intake | Primary | Receive the claim, classify documents, register the case | Minutes |
-| 2. Eligibility Analysis | Primary | Verify the threshold requirements (policy in force, identity, address, period, filing deadline) | Minutes |
-| 3. Data Analysis | Primary | Determine coverage, calculate the payout, assess credibility, reach a decision | Minutes |
-| 4. Claim Review | Primary (conditional) | Senior adjuster reviews escalated claims and issues a final disposition | 1–3 business days |
-| 5. Settlement & Closure | Primary | Communicate the decision, issue payment if applicable, close the case | 1–2 business days |
-| Awaiting Assessment | Secondary | Wait for the Professional Incident Report following an inspection | 1–10 business days |
-| Details Inquiry | Secondary | Wait for additional information requested from the claimant | Up to 14 calendar days |
+| Stage                   | Type                  | Purpose                                                                                         | Typical duration       | Client SLA |
+| ----------------------- | --------------------- | ----------------------------------------------------------------------------------------------- | ---------------------- | ---------- |
+| 1. Intake               | Primary               | Receive the claim, classify documents, register the case                                        | 1-2 hours              | 1 day      |
+| 2. Eligibility Analysis | Primary               | Verify the threshold requirements (policy in force, identity, address, period, filing deadline) | 1-2 days               | 3 days     |
+| 3. Data Analysis        | Primary               | Determine coverage, calculate the payout, assess credibility, reach a decision                  | 3-5 days               | 5 days     |
+| 4. Claim Review         | Primary (conditional) | Senior adjuster reviews escalated claims and issues a final disposition                         | 1–2 business days      | 5 days     |
+| 5. Settlement & Closure | Primary               | Communicate the decision, issue payment if applicable, close the case                           | 1 day                  | 1 day      |
+| Awaiting Assessment     | Secondary             | Wait for the Professional Incident Report following an inspection                               | 1–10 business days     | 10 days    |
+| Details Inquiry         | Secondary             | Wait for additional information requested from the claimant                                     | Up to 14 calendar days | N/A        |
 
 ---
 
@@ -198,13 +202,14 @@ PRIMARY PATH                              SECONDARY (CONDITIONAL) STAGES
                                      [ END ]
 ```
 
-**Details Inquiry** is not shown in the diagram above because it may be invoked from more than one stage. When entered, it temporarily holds the claim while a request for additional information is sent to the claimant; on receipt of a reply, the claim returns to the stage from which the inquiry was initiated and continues along the flow above. Entry points are described in §7.4.
+Notes:
+- **Details Inquiry** is not shown in the diagram above because it may be invoked from more than one stage. When entered, it temporarily holds the claim while a request for additional information is sent to the claimant; on receipt of a reply, the claim returns to the stage from which the inquiry was initiated and continues along the flow above. Entry points are described in §7.4.
 
 ---
 
 ## 7. Stage-by-stage procedure
 
-### 7.1 Stage 1 — Intake
+### 7.1 Stage 1: Intake
 
 **Purpose.** Receive the claim, capture the data from each document, and create the case record that will track the claim through the rest of the process.
 
@@ -220,13 +225,13 @@ PRIMARY PATH                              SECONDARY (CONDITIONAL) STAGES
 
 **Exit.** Case record is created; documents are linked to the case; claimant has been acknowledged.
 
-**Notes.**
-- If the Professional Incident Report has not yet arrived, the claim can still proceed to Eligibility Analysis. The Incident Report is required from Stage 3 onward.
-- If the Claim Form or Insurance Policy is missing, the claim enters the **Details Inquiry** secondary stage and the claimant is contacted to supply the missing document before any further processing.
+Notes:
+- If the Professional Incident Report has not yet arrived, the claim can still proceed to **Eligibility Analysis**. The Incident Report is required from Stage 3 onward.
+- If the **Claim Form** or **Insurance Policy** is missing, the claim enters the **Details Inquiry** secondary stage and the claimant is contacted to supply the missing document before any further processing.
 
 ---
 
-### 7.2 Stage 2 — Eligibility Analysis
+### 7.2 Stage 2: Eligibility Analysis
 
 **Purpose.** Confirm that the claim meets the threshold requirements for processing. No coverage analysis or payout calculation is performed at this stage.
 
@@ -255,7 +260,7 @@ PRIMARY PATH                              SECONDARY (CONDITIONAL) STAGES
 
 ### 7.3 Awaiting Assessment (Conditional)
 
-**Purpose.** Pause the lifecycle while an independent licensed assessor inspects the property and produces the Professional Incident Report. This stage runs only when the claim has cleared Eligibility Analysis and the report is not yet on file.
+**Purpose.** Pause the lifecycle while an independent licensed assessor inspects the property and produces the professional **Incident Report**. This stage runs only when the claim has cleared **Eligibility Analysis** and the report is not yet on file.
 
 **Entry.** Eligibility Analysis confirmed; Professional Incident Report not yet received.
 
@@ -298,7 +303,7 @@ PRIMARY PATH                              SECONDARY (CONDITIONAL) STAGES
 
 ---
 
-### 7.5 Stage 3 — Data Analysis
+### 7.5 Stage 3: Data Analysis
 
 **Purpose.** Determine whether the loss is covered, calculate the amount payable, assess the credibility of the claim, and arrive at a decision.
 
@@ -368,7 +373,7 @@ Send the claimant an email update confirming that analysis is complete and that 
 
 ---
 
-### 7.6 Stage 4 — Claim Review
+### 7.6 Stage 4: Claim Review
 
 **Purpose.** Apply senior human judgement to claims that the Data Analysis stage was unable to decide with confidence.
 
@@ -387,7 +392,7 @@ Send the claimant an email update confirming that analysis is complete and that 
 
 ---
 
-### 7.7 Stage 5 — Settlement and Closure
+### 7.7 Stage 5: Settlement and Closure
 
 **Purpose.** Communicate the decision to the claimant, disburse any payment due, and close the case.
 
@@ -400,7 +405,7 @@ Send the claimant an email update confirming that analysis is complete and that 
 4. Update the case status to closed and archive the complete case record for audit purposes.
 5. Send the claimant a final email confirmation that the case has been closed and provide the reference number for any future correspondence.
 
-**Exit.** Letter delivered; payment instruction issued (if applicable); case archived.
+**Exit.** Email sent; payment instruction issued (if applicable); case archived.
 
 ---
 
@@ -410,13 +415,13 @@ Every check performed in the process has a stable identifier. These identifiers 
 
 ### 8.1 Eligibility rules
 
-| ID | Rule | Pass condition | On failure |
-|---|---|---|---|
-| **E-1** | Policy in force on the incident date | Payment status is *Current* or *Paid* | Deny: "Policy not in force" |
-| **E-2** | Claimant identity matches the named insured | Names refer to the same person (minor variations such as nicknames are acceptable) | Deny: "Claimant is not the named insured" |
-| **E-3** | Property address matches | The address on all three documents resolves to the same physical address after normalisation | Deny: "Claimed property does not match insured property" |
-| **E-4** | Incident within the policy period | Incident date falls between the effective and expiration dates of the policy | Deny: "Loss occurred outside the policy period" |
-| **E-5** | Filing deadline | Claim filed within sixty calendar days of the incident, or the claimant has provided a credible explanation for the delay | Deny if no explanation provided; otherwise escalate |
+| ID      | Rule                                        | Pass condition                                                                                                            | On failure                                                                |
+| ------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **E-1** | Policy in force on the incident date        | Payment status is *Current* or *Paid*                                                                                     | Deny: "Policy not in force on the incident date"                          |
+| **E-2** | Claimant identity matches the named insured | Names refer to the same person (minor variations such as nicknames are acceptable)                                        | Deny: "Claimant is not the named insured, please resubmit"                |
+| **E-3** | Property address matches                    | The address on all three documents resolves to the same physical address after normalisation                              | Deny: "Claimed property does not match insured property, please resubmit" |
+| **E-4** | Incident within the policy period           | Incident date falls between the effective and expiration dates of the policy                                              | Deny: "Loss occurred outside the policy period"                           |
+| **E-5** | Filing deadline                             | Claim filed within sixty calendar days of the incident, or the claimant has provided a credible explanation for the delay | Deny if no explanation provided; otherwise escalate                       |
 
 ### 8.2 Coverage rules
 
@@ -433,27 +438,27 @@ Every check performed in the process has a stable identifier. These identifiers 
 
 ### 8.3 Payout rules
 
-| ID | Rule | Logic |
-|---|---|---|
-| **P-1** | Coverage A cap | The payout under Coverage A cannot exceed the Dwelling limit of liability. |
-| **P-2** | Coverage B cap | The payout under Coverage B cannot exceed the Other Structures limit of liability. |
-| **P-3** | Coverage C cap | The payout under Coverage C, after sublimits, cannot exceed the Personal Property limit of liability. |
-| **P-4** | Coverage D cap | The payout under Coverage D cannot exceed the Loss of Use limit of liability. |
-| **P-5** | Jewellery sublimit | The aggregate payout for jewellery, watches, furs, and precious stones is capped at the jewellery sublimit. |
-| **P-6** | Electronics sublimit | The aggregate payout for electronics, computers, and related equipment is capped at the electronics sublimit. |
-| **P-7** | Deductible | The deductible is subtracted once from the combined total of Coverages A, B, and C. It does not apply to Coverage D. |
-| **P-8** | Settlement basis | When the Replacement Cost Endorsement is active, settle at replacement cost provided the property is repaired or replaced. When the endorsement is absent or inactive, settle at Actual Cash Value. |
-| **P-9** | Reasonableness check | When the claimed amount exceeds the independent repair estimate by more than twenty per cent, flag the claim for review. When it exceeds by more than fifty per cent, escalate. |
+| ID      | Rule                 | Logic                                                                                                                                                                                               |
+| ------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P-1** | Coverage A cap       | The payout under Coverage A cannot exceed the Dwelling limit of liability.                                                                                                                          |
+| **P-2** | Coverage B cap       | The payout under Coverage B cannot exceed the Other Structures limit of liability.                                                                                                                  |
+| **P-3** | Coverage C cap       | The payout under Coverage C, after sublimits, cannot exceed the Personal Property limit of liability.                                                                                               |
+| **P-4** | Coverage D cap       | The payout under Coverage D cannot exceed the Loss of Use limit of liability.                                                                                                                       |
+| **P-5** | Jewellery sublimit   | The aggregate payout for jewellery, watches, furs, and precious stones is capped at the jewellery sublimit.                                                                                         |
+| **P-6** | Electronics sublimit | The aggregate payout for electronics, computers, and related equipment is capped at the electronics sublimit.                                                                                       |
+| **P-7** | Deductible           | The deductible is subtracted once from the combined total of Coverages A, B, and C. It does not apply to Coverage D.                                                                                |
+| **P-8** | Settlement basis     | When the Replacement Cost Endorsement is active, settle at replacement cost provided the property is repaired or replaced. When the endorsement is absent or inactive, settle at Actual Cash Value. |
+| **P-9** | Reasonableness check | When the claimed amount exceeds the independent repair estimate by more than twenty per cent, flag the claim for review. When it exceeds by more than fifty per cent, escalate.                     |
 
 ### 8.4 Credibility rules
 
-| ID | Rule | Risk level guide |
-|---|---|---|
-| **CR-1** | Narrative consistency between claimant and assessor | Material contradiction → high. Minor wording differences → low. |
-| **CR-2** | Estimate reasonableness | Same ratio as P-9. 1.00–1.20 → low. 1.21–1.50 → medium. Greater than 1.50 → high. |
-| **CR-3** | Documentation completeness | Missing signature, unsigned report, blank required fields → medium or high depending on which fields. |
-| **CR-4** | Timing and pattern | Incident-to-claim gap greater than thirty days is notable; greater than forty-five days is a flag. Incident-to-assessment gap greater than sixty days is notable. A prior-claims pattern of repeated similar incidents → high. |
-| **CR-5** | Cause mismatch between claimant and assessor | Escalate; rely on the assessor's determination for coverage analysis. |
+| ID       | Rule                                                | Risk level guide                                                                                                                                                                                                               |
+| -------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **CR-1** | Narrative consistency between claimant and assessor | Material contradiction → high. Minor wording differences → low.                                                                                                                                                                |
+| **CR-2** | Estimate reasonableness                             | Same ratio as P-9. 1.00–1.20 → low. 1.21–1.50 → medium. Greater than 1.50 → high.                                                                                                                                              |
+| **CR-3** | Documentation completeness                          | Missing signature, unsigned report, blank required fields → medium or high depending on which fields.                                                                                                                          |
+| **CR-4** | Timing and pattern                                  | Incident-to-claim gap greater than thirty days is notable; greater than forty-five days is a flag. Incident-to-assessment gap greater than sixty days is notable. A prior-claims pattern of repeated similar incidents → high. |
+| **CR-5** | Cause mismatch between claimant and assessor        | Escalate; rely on the assessor's determination for coverage analysis.                                                                                                                                                          |
 
 ### 8.5 Final-decision rules
 
