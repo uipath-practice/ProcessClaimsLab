@@ -76,29 +76,29 @@ The SDD is the bridge between the business process definition document (PDD) and
    │              Maestro Process Orchestrator                   │ │
    │                                                             │ │
    │   ┌────────────┐                                            │ │
-   │   │ Agent 01   │ Claims Eligibility ── 5 threshold checks   │ │
+   │   │ Agent 01   │ Claim Eligibility ── 5 threshold checks    │ │
    │   └─────┬──────┘                                            │ │
    │         │  (escalate) ─► Action Center (Claim Review,       │ │
    │         │                  eligibility trigger)             │ │
    │         ▼                                                   │ │
    │   ┌────────────┐                                            │ │
-   │   │ Agent 1a   │ Validate Assessment Report                 │ │
+   │   │ Agent 02   │ Assessment Validation                      │ │
    │   └─────┬──────┘                                            │ │
    │         ▼                                                   │ │
    │   ┌────────────┬────────────┬────────────┐                  │ │
-   │   │ Agent 02   │ Agent 03   │ Agent 04   │  parallel block  │ │
+   │   │ Agent 03   │ Agent 04   │ Agent 05   │  parallel block  │ │
    │   │ Coverage   │ Payout     │ Credibility│                  │ │
    │   └─────┬──────┴─────┬──────┴─────┬──────┘                  │ │
    │         └────────────┼────────────┘                         │ │
    │                      ▼                                      │ │
    │   ┌────────────┐                                            │ │
-   │   │ Agent 05   │ Decision                                   │ │
+   │   │ Agent 06   │ Decision                                   │ │
    │   └─────┬──────┘                                            │ │
    │         │  (escalate) ─► Action Center (Claim Review,       │ │
    │         │                  decision trigger)                │ │
    │         ▼                                                   │ │
    │   ┌────────────┐                                            │ │
-   │   │ Agent 06   │ Claim Response — letter                    │ │
+   │   │ Agent 07   │ Claim Response — letter                    │ │
    │   └────────────┘                                            │ │
    └──────────────────────┬──────────────────────────────────────┘ │
                           ▼                                        │
@@ -145,12 +145,12 @@ This section maps every PDD stage onto the UiPath components that realise it. Nu
 
 | Aspect                | Mapping                                                                                                                                                                                                                                                                                           |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Component**         | Claims Eligibility Agent                                                                                                                                                                                                                                                                          |
+| **Component**         | 01 Claim Eligibility Agent                                                                                                                                                                                                                                                                        |
 | **Inputs**            | `in_PolicyID`, `in_ClaimIXPDataJSON`, `in_PolicyPDF`                                                                                                                                                                                                                                              |
-| **Outputs persisted** | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_EligibilityChecksJSON`, `out_EligibilityAnalysisSummary`                                                                                                                                                                                          |
+| **Outputs persisted** | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_ClaimEligibilityJSON`, `out_ClaimEligibilitySummary`                                                                                                                                                                                              |
 | **Escalation path**   | When the agent returns `recommendation = escalate`, Maestro creates an Action Center task targeting the **Claim Review** Coded Action App with `triggerStage = "eligibility"`. The reviewer's outcome (`continue` or `deny`) is written back to the case as `out_EscalationDecision_Eligibility`. |
 | **Auto-deny path**    | When the agent returns `recommendation = deny`, Maestro transitions the case directly to `Settlement & Closure`.                                                                                                                                                                                  |
-| **Email**             | The robot sends a status email after Agent Eligibility Agent completes, if decision is that claim is eligible for analysis.                                                                                                                                                                       |
+| **Email**             | The robot sends a status email after the 01 Claim Eligibility Agent completes if the claim is found eligible for analysis.                                                                                                                                                                        |
 
 ### 5.3 Awaiting Assessment (Secondary stage)
 
@@ -173,14 +173,14 @@ This section maps every PDD stage onto the UiPath components that realise it. Nu
 
 ### 5.5 Stage 3 — Data Analysis
 
-| Aspect                      | Mapping                                                                                                                                                                                                             |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Entry condition**         | Eligibility confirmed and `assessmentReportPdf` present.                                                                                                                                                            |
-| **Sub-step 1 — Validate**   | Agent 1a runs against the assessor PDF, the policy data, and the eligibility result. Persists `out_AssessmentReportJSON`, `out_AssessmentReportValidationJSON`, `out_AssessmentReportAnalysisSummary`.              |
-| **Sub-step 2 — Parallel**   | Maestro spawns Agents 02, 03, and 04 in parallel. Each receives the same inputs (claim data, policy data, validated assessment, eligibility result, prior claims). Each emits its own check set and recommendation. |
-| **Sub-step 3 — Synthesise** | Decision Agent 05 consumes all four upstream outputs and produces `out_FinalDecision` + `out_DecisionJSON`.                                                                                                         |
-| **Escalation path**         | If `out_FinalDecision = escalate`, Maestro creates an Action Center task targeting **Claim Review** with `triggerStage = "decision"`. Otherwise the case transitions directly to `Settlement & Closure`.            |
-| **Email**                   | The robot sends a status email after Decision Agent 05 completes.                                                                                                                                                   |
+| Aspect                      | Mapping                                                                                                                                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Entry condition**         | Eligibility confirmed and `assessmentReportPdf` present.                                                                                                                                                                                 |
+| **Sub-step 1 — Validate**   | The 02 Assessment Validation Agent runs against the assessor PDF, the policy data, and the eligibility result. Persists `out_AssessmentReportJSON`, `out_AssessmentValidationJSON`, `out_AssessmentValidationSummary`.                   |
+| **Sub-step 2 — Parallel**   | Maestro spawns Agents 03, 04, and 05 in parallel. Each receives the same inputs (claim data, policy data, validated assessment, eligibility result, prior claims, reviewer notes if any). Each emits its own check set and recommendation. |
+| **Sub-step 3 — Synthesise** | The 06 Decision Agent consumes all four upstream outputs and produces `out_FinalDecision` + `out_DecisionJSON`.                                                                                                                          |
+| **Escalation path**         | If `out_FinalDecision = escalate`, Maestro creates an Action Center task targeting **Claim Review** with `triggerStage = "decision"`. Otherwise the case transitions directly to `Settlement & Closure`.                                 |
+| **Email**                   | The robot sends a status email after the 06 Decision Agent completes.                                                                                                                                                                    |
 
 ### 5.6 Stage 4 — Claim Review
 
@@ -196,9 +196,9 @@ This section maps every PDD stage onto the UiPath components that realise it. Nu
 
 | Aspect          | Mapping                                                                                                                                                                                                                                                                                                                                                                                       |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Component**   | Agent 06 (Claim Response Agent) → Unattended Robot (settlement) → Integration Service → Orchestrator queue                                                                                                                                                                                                                                                                                    |
-| **Sequence**    | (1) Claim Response Agent 06 drafts the decision letter incorporating any reviewer comment; (2) the robot sends the letter by email via Integration Service to the address on file; (3) for approvals and partial approvals, the robot posts a payment instruction to the **Finance Payout Queue** in Orchestrator; (4) the robot updates the case status to `closed` and archives the record. |
-| **Persistence** | `out_ClaimResponseJSON` (letter text + metadata) + `out_ClaimResponseAnalysisSummary`; case `status = approved \| partial_approved \| denied \| closed`.                                                                                                                                                                                                                                      |
+| **Component**   | 07 Claim Response Agent → Unattended Robot (settlement) → Integration Service → Orchestrator queue                                                                                                                                                                                                                                                                                            |
+| **Sequence**    | (1) The 07 Claim Response Agent drafts the decision letter incorporating any reviewer comment; (2) the robot sends the letter by email via Integration Service to the address on file; (3) for approvals and partial approvals, the robot posts a payment instruction to the **Finance Payout Queue** in Orchestrator; (4) the robot updates the case status to `closed` and archives the record. |
+| **Persistence** | `out_ClaimResponseJSON` (letter text + metadata) + `out_ClaimResponseSummary`; case `status = approved \| partial_approved \| denied \| closed`.                                                                                                                                                                                                                                              |
 
 ---
 
@@ -206,51 +206,63 @@ This section maps every PDD stage onto the UiPath components that realise it. Nu
 
 ### 6.1 Agent roster
 
-| # | Agent | Stage | Inputs (high-level) | Primary outputs | Recommendation values |
-|---|---|---|---|---|---|
-| **01** | Claims Eligibility | 2 | Policy ID, Claim IXP data, Policy PDF | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_EligibilityChecksJSON` | `proceed_to_coverage_analysis` \| `deny` \| `escalate` |
-| **1a** | Validate Assessment Report | 3 entry | Claim data, Policy data, Assessor PDF, Eligibility result | `out_AssessmentReportJSON`, `out_AssessmentReportValidationJSON` | `proceed_to_parallel_analysis` \| `escalate` \| `reject_report` |
-| **02** | Coverage Analysis | 3 (parallel) | Claim, Policy, Assessment, Eligibility | `out_CoverageChecksJSON` | `proceed_to_payout` \| `deny_all` \| `partial_approval` \| `escalate` |
-| **03** | Payout Calculation | 3 (parallel) | Claim, Policy, Assessment, Eligibility | `out_PayoutChecksJSON` | `approve_payout` \| `flag_for_review` \| `escalate` |
-| **04** | Credibility Assessment | 3 (parallel) | Claim, Policy, Assessment, Eligibility, Prior claims | `out_CredibilityChecksJSON` | `proceed_to_decision` \| `escalate_to_human` |
-| **05** | Decision | 3 (synthesis) | All upstream agent outputs | `out_FinalDecision`, `out_DecisionJSON` | `approve` \| `partial_approve` \| `deny` \| `escalate` |
-| **06** | Claim Response | 5 | All upstream + optional reviewer outcome | `out_ClaimResponseJSON` | (drafts a letter; no recommendation) |
+Naming convention: **`<ID> <Purpose> Agent`**. The slug column is used in file names (`NN_<slug>_agent_prompts.md`) and in PascalCase form for variables (`out_<AgentName>JSON`).
 
-Detailed prompts, payload schemas, and worked examples live in `3-agents/`.
+| #      | Agent                            | Slug                     | Stage           | Inputs (high-level)                                       | Primary outputs                                                                  | Recommendation values                                                              |
+| ------ | -------------------------------- | ------------------------ | --------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **01** | Claim Eligibility Agent          | `claim_eligibility`      | 2               | Policy ID, Claim IXP data, Policy PDF                     | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_ClaimEligibilityJSON`            | `proceed_to_coverage_analysis` \| `deny` \| `escalate`                              |
+| **02** | Assessment Validation Agent      | `assessment_validation`  | 3 entry         | Claim data, Policy data, Assessor PDF, Eligibility result | `out_AssessmentReportJSON`, `out_AssessmentValidationJSON`                       | `proceed_to_parallel_analysis` \| `escalate` \| `reject_report`                     |
+| **03** | Coverage Analysis Agent          | `coverage_analysis`      | 3 (parallel)    | Claim, Policy, Assessment, Eligibility, reviewer notes    | `out_CoverageAnalysisJSON`                                                        | `proceed_to_payout` \| `deny_all` \| `partial_approval` \| `escalate`               |
+| **04** | Payout Calculation Agent         | `payout_calculation`     | 3 (parallel)    | Claim, Policy, Assessment, Eligibility, reviewer notes    | `out_PayoutCalculationJSON`                                                       | `approve_payout` \| `flag_for_review` \| `escalate`                                 |
+| **05** | Credibility Assessment Agent     | `credibility_assessment` | 3 (parallel)    | Claim, Policy, Assessment, Eligibility, Prior claims, reviewer notes | `out_CredibilityAssessmentJSON`                                       | `proceed_to_decision` \| `escalate_to_human`                                        |
+| **06** | Decision Agent                   | `decision`               | 3 (synthesis)   | All upstream agent outputs, reviewer notes                | `out_FinalDecision`, `out_DecisionJSON`                                          | `approve` \| `partial_approve` \| `deny` \| `escalate`                              |
+| **07** | Claim Response Agent             | `claim_response`         | 5               | All upstream + optional reviewer outcome                  | `out_ClaimResponseJSON`                                                          | (drafts a letter; no recommendation)                                                |
+
+Every agent additionally emits the plain-text `out_<AgentName>Summary` field carrying the same content as the envelope's `summary`.
+
+Detailed prompts, payload schemas, and worked examples live in `3-agents/`. Model assignment per agent is in `CONFIG.md` §1.
 
 ### 6.2 Data flow
 
 ```
-Intake (RPA + IXP)
+Intake (RPA + IXP for Claim Form only)
    │  in_PolicyID, in_ClaimIXPDataJSON, in_PolicyPDF
    ▼
-[01] Claims Eligibility ──► out_ClaimDataJSON, 
-							out_PolicyDataJSON,
-	                        out_EligibilityChecksJSON,
-	                        out_EligibilityAnalysisSummary
+[01] Claim Eligibility Agent
+                        ──► out_ClaimDataJSON,
+                            out_PolicyDataJSON,
+                            out_ClaimEligibilityJSON,
+                            out_ClaimEligibilitySummary
    │
    │  (proceed_to_coverage_analysis)
    ▼
-[1a] Validate Assessment Report
+[02] Assessment Validation Agent
                         ──► out_AssessmentReportJSON,
-						    out_AssessmentReportValidationJSON,
-                            out_AssessmentReportAnalysisSummary
+                            out_AssessmentValidationJSON,
+                            out_AssessmentValidationSummary
    │
    ▼  (Maestro fork)
-┌────────────────────── parallel block ──────────────────────┐
-[02] Coverage Analysis          ──► out_CoverageChecksJSON
-[03] Payout Calculation.        ──► out_PayoutChecksJSON
-[04] Credibility Assessmentmt   ──► out_CredibilityChecksJSON
-└────────────────────────────────────────────────────────────┘
+┌─────────────────────────── parallel block ───────────────────────────┐
+[03] Coverage Analysis Agent      ──► out_CoverageAnalysisJSON,
+                                      out_CoverageAnalysisSummary
+[04] Payout Calculation Agent     ──► out_PayoutCalculationJSON,
+                                      out_PayoutCalculationSummary
+[05] Credibility Assessment Agent ──► out_CredibilityAssessmentJSON,
+                                      out_CredibilityAssessmentSummary
+└──────────────────────────────────────────────────────────────────────┘
    │  (Maestro join)
    ▼
-[05] Decision           ──► out_FinalDecision
-							out_DecisionJSON
+[06] Decision Agent     ──► out_FinalDecision,
+                            out_DecisionJSON,
+                            out_DecisionSummary
    │
    │  (auto path: approve / partial / deny)
-   │  (escalate path: Action Center → reviewer outcome)
+   │  (escalate path: Action Center → reviewer outcome → reviewerNotes
+   │                  fed back into the case and propagated as input
+   │                  to all downstream agents)
    ▼
-[06] Claim Response     ──► out_ClaimResponseJSON (letter)
+[07] Claim Response Agent ──► out_ClaimResponseJSON (letter),
+                              out_ClaimResponseSummary
    │
    ▼
 Settlement (RPA)
@@ -282,38 +294,42 @@ The envelope at a glance:
       }
     ],
     "findings":  [ "<short bullet, suitable for human display>" ],
-    "summary":   "<plain-text reasoning paragraph; mirrored on out_<AgentName>AnalysisSummary>",
+    "summary":   "<plain-text reasoning paragraph; mirrored on out_<AgentName>Summary>",
     "details":   { /* agent-specific structured payload (coverage_determination,
                      section_totals, credibility_assessment, etc.) */ }
   },
-  "out_<AgentName>AnalysisSummary": "<plain-text duplicate of summary, for backwards compat>"
+  "out_<AgentName>Summary": "<plain-text duplicate of summary, surfaced directly by panels and emails>"
 }
 ```
 
 Notes:
 
 - The shared envelope keys (`status`, `recommendation`, `checks`, `findings`, `summary`, `details`) are present on every agent output.
+- `AgentName` is PascalCase derived from the agent slug (`claim_eligibility` → `ClaimEligibility`).
 - The inner `details` block is the only agent-specific area. Apps render it through an "Inspect JSON" expander; structured renderers for `details` are added per agent only when there is a strong UX case.
-- Agents that also emit auxiliary outputs (e.g. Agent 01 emits `out_ClaimDataJSON` + `out_PolicyDataJSON`; Agent 06 emits `out_ClaimResponseJSON`) place those at the same level as the envelope, not inside it.
+- Agents that also emit auxiliary outputs (e.g. the 01 Claim Eligibility Agent emits `out_ClaimDataJSON` + `out_PolicyDataJSON`; the 07 Claim Response Agent emits `out_ClaimResponseJSON`) place those at the same level as the envelope, not inside it.
+- When a reviewer override is present in the case, agents in stages after the override receive `reviewerNotes` as an input and must not re-raise concerns the reviewer has resolved (see `CONFIG.md` §10).
 - The full schema, including the discriminated-union variants of `details` per agent, lives in `2-data-format/`.
 
 ### 6.4 Model selection and the AI Trust Layer
 
-| Concern               | Approach                                                                                                                                                                                                                                                                                                                                            |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Model selection**   | Each agent is configured with a model appropriate to its task in Agent Builder. Eligibility and Decision are deterministic and use a small reasoning model; Coverage and Credibility benefit from a stronger reasoning model; Claim Response is drafting work and uses a model tuned for tone. Specific model IDs are an environment configuration. |
-| **PII handling**      | The AI Trust Layer is enabled for all agents. Claimant PII (name, address, email, phone) is allowed through because it is required for adjudication; financial account details and identifiers are out of scope.                                                                                                                                    |
-| **Prompt versioning** | Agent prompts in `3-agents/` are the source of truth. Maestro pins the agent version at deployment time.                                                                                                                                                                                                                                            |
-| **Telemetry**         | Token usage, latency, and model identity are written to AI Trust Layer logs and surfaced in the Process App via a future Timeline view.                                                                                                                                                                                                             |
+| Concern               | Approach                                                                                                                                                                                                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Model selection**   | `CONFIG.md` §1 defines two model roles (`default_model`, `reasoning_model`) and assigns one to each agent. Agent prompts reference the roles symbolically; concrete model IDs are not pinned in prompts. Coverage Analysis, Credibility Assessment, and Decision use the reasoning model; the rest use the default. |
+| **PII handling**      | The AI Trust Layer is enabled for all agents. Claimant PII (name, address, email, phone) is allowed through because it is required for adjudication; financial account details and identifiers are out of scope.                                                                                                  |
+| **Prompt versioning** | Agent prompts in `3-agents/` are the source of truth. Maestro pins the agent version at deployment time.                                                                                                                                                                                                          |
+| **Telemetry**         | Token usage, latency, and model identity are written to AI Trust Layer logs and surfaced in the Process App via a future Timeline view.                                                                                                                                                                           |
 
 ### 6.5 Where the detail lives
 
-`3-agents/` holds, per agent, two files:
+`3-agents/` holds, per agent, two files keyed by the agent slug:
 
-- `NN_<agent_name>_agent_prompts.md` — Role, Inputs Provided, Instructions, Output Format, Special Rules, User Prompt.
-- `NN_<agent_name>_agent_payloads.md` — Inputs JSON schema, Output Format narrative, Output JSON schema, Sample Payload.
+- `NN_<agent_slug>_agent_prompts.md` — Role, Inputs Provided, Instructions, Output Format, Special Rules, User Prompt.
+- `NN_<agent_slug>_agent_payloads.md` — Inputs JSON schema, Output Format narrative, Output JSON schema, Sample Payload.
 
-File naming conventions, the required `out_<Step>AnalysisSummary` field, and the consistency checklist follow the rules in `inputs/agents input/agents.md` (carried forward verbatim into `3-agents/`).
+`NN` is the two-digit agent number (`01`..`07`). Example: `3-agents/03_coverage_analysis_agent_prompts.md`.
+
+File naming conventions, the required `out_<AgentName>Summary` field, and the consistency checklist follow the rules in `inputs/agents input/agents.md` (carried forward into `3-agents/` with the new envelope contract applied).
 
 ---
 
@@ -350,16 +366,16 @@ escalated | approved | partial_approved | denied | closed
 | **Lifecycle**             | `currentStage`, `status`, `updatedAt`, `reviewRequired`, `triggerStage`                                                                        |
 | **Attachments**           | `claimFormPdf`, `policyPdf`, `assessmentReportPdf` (each as an attachment reference resolved against Storage Buckets)                          |
 | **Reference data**        | `priorClaims[]` (denormalised summary of the claimant's prior claims)                                                                          |
-| **Intake outputs**        | `out_ClaimIXPDataJSON`                                                                                                                         |
-| **Agent 01**              | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_EligibilityChecksJSON`, `out_EligibilityAnalysisSummary`, `out_isEligible`, `out_isComplete`   |
-| **Agent 1a**              | `out_AssessmentReportJSON`, `out_AssessmentReportValidationJSON`, `out_AssessmentReportAnalysisSummary`                                        |
-| **Agent 02**              | `out_CoverageChecksJSON`, `out_CoverageAnalysisSummary`                                                                                        |
-| **Agent 03**              | `out_PayoutChecksJSON`, `out_PayoutAnalysisSummary`                                                                                            |
-| **Agent 04**              | `out_CredibilityChecksJSON`, `out_CredibilityAnalysisSummary`                                                                                  |
-| **Agent 05**              | `out_FinalDecision`, `out_DecisionJSON`, `out_DecisionAnalysisSummary`                                                                         |
-| **Agent 06**              | `out_ClaimResponseJSON`, `out_ClaimResponseAnalysisSummary`                                                                                    |
-| **Human review**          | `out_EscalationDecision_Eligibility`, `out_EscalationComment_Eligibility`, `out_EscalationDecision_Decision`, `out_EscalationComment_Decision` |
-| **Inquiry**               | `out_DetailsInquiryJSON`                                                                                                                       |
+| **Intake outputs**        | `out_ClaimIXPDataJSON`                                                                                                                            |
+| **Agent 01**              | `out_ClaimDataJSON`, `out_PolicyDataJSON`, `out_ClaimEligibilityJSON`, `out_ClaimEligibilitySummary`, `out_isEligible`, `out_isComplete`           |
+| **Agent 02**              | `out_AssessmentReportJSON`, `out_AssessmentValidationJSON`, `out_AssessmentValidationSummary`                                                     |
+| **Agent 03**              | `out_CoverageAnalysisJSON`, `out_CoverageAnalysisSummary`                                                                                         |
+| **Agent 04**              | `out_PayoutCalculationJSON`, `out_PayoutCalculationSummary`                                                                                       |
+| **Agent 05**              | `out_CredibilityAssessmentJSON`, `out_CredibilityAssessmentSummary`                                                                               |
+| **Agent 06**              | `out_FinalDecision`, `out_DecisionJSON`, `out_DecisionSummary`                                                                                    |
+| **Agent 07**              | `out_ClaimResponseJSON`, `out_ClaimResponseSummary`                                                                                               |
+| **Human review**          | `out_EscalationDecision_Eligibility`, `out_EscalationComment_Eligibility`, `out_EscalationDecision_Decision`, `out_EscalationComment_Decision`    |
+| **Inquiry**               | `out_DetailsInquiryJSON`                                                                                                                          |
 
 The detailed field list, types, and Data Service column mapping live in `2-case-management/`.
 
@@ -459,6 +475,8 @@ The initial release uses the **Generative Extractor** capability in IXP. This av
 
 The full field catalogue per document type is in `2-data-format/document-fields.md`.
 
+> **Note for coding agents.** The implementation differs from the conceptual description above in one important way: **only the Claim Form is sent to IXP**. The Insurance Policy PDF is passed directly to the **01 Claim Eligibility Agent** as an input PDF, and the Professional Incident Report PDF is passed directly to the **02 Assessment Validation Agent**. Each of those agents extracts the fields it needs into its own JSON output (`out_PolicyDataJSON`, `out_AssessmentReportJSON`), with `evidence[]` entries citing the source document. The descriptions in §9.1 / §9.2 should be read as *"the data must end up in JSON"* — in code, the agent itself produces that JSON rather than IXP. See `CONFIG.md` §8 for the routing table.
+
 ### 9.3 Data normalisation
 
 After extraction, the following deterministic normalisations are applied before any rule evaluates the data:
@@ -480,7 +498,7 @@ The unattended robots handle the integrations that sit between the agentic pipel
 
 ### 10.1 Email notifications
 
-All claimant communications are delivered by email through the **UiPath Integration Service** email connector. The robot resolves the claimant's address from `out_ClaimDataJSON.ClaimClaimant.EmailAddress`. The locale of the message body is derived from the claimant's address country (see PDD §11).
+All claimant communications are delivered by email through the **UiPath Integration Service Gmail connector** (see `CONFIG.md` §4). The robot resolves the claimant's address from `out_ClaimDataJSON.ClaimClaimant.EmailAddress`. The locale of the message body is derived from the claimant's address country (see PDD §11).
 
 | Touchpoint | Email |
 |---|---|
@@ -534,13 +552,13 @@ The agents make no use of the generator tags; tags are used to verify that agent
 
 ### 11.1 Environments
 
-| Environment | Purpose |
-|---|---|
-| Development | Iterative development; mock data only |
-| Pre-production | End-to-end testing against the synthetic-document generator and stub integrations |
-| Production | Live claims processing |
+| Environment | Tenant slug         | Purpose |
+|---|---|---|
+| Development | `apexmutual-dev`   | Iterative development; mock data only |
+| Test        | `apexmutual-test`  | End-to-end testing against the synthetic-document generator and stub integrations |
+| Production  | `apexmutual-prod`  | Live claims processing |
 
-Each environment is a separate UiPath tenant under the Apex Mutual organisation. Environment-specific values (URLs, client IDs, bucket names) are kept in deployment configuration outside this document.
+Each environment is a separate UiPath tenant under the Apex Mutual organisation. Environment-specific values (URLs, client IDs, bucket names) are kept in deployment configuration outside this document. The full configuration table is in `CONFIG.md` §2.
 
 ### 11.2 External App registration
 
@@ -612,22 +630,24 @@ Every check carried out by an agent has a stable rule ID (E-1, C-3, P-7, CR-2, D
 
 ---
 
-## 13. Open architectural decisions
+## 13. Architectural decision log
 
-These items are recommended for sign-off before downstream artefacts are locked.
+All architectural decisions below are **resolved**. They are recorded here as a reference for downstream specs and code generation.
 
-| #       | Decision                                              | Recommendation                                                                                                                                                                                       |
-| ------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A1**  | IXP extractor type for the Policy and Incident Report | Generative Extractor — no model training overhead, tolerates document variation                                                                                                                      |
-| **A2**  | Email provider through Integration Service            | Microsoft 365 / Outlook connector for managed delivery; SMTP fallback for environments without a tenant mailbox                                                                                      |
-| **A3**  | LLM model assignment per agent                        | Eligibility and Decision: a small reasoning model; Coverage and Credibility: a stronger reasoning model; Claim Response: a model tuned for drafting tone. Specific IDs are environment-configurable. |
-| **A4**  | Date storage on the case entity                       | Always ISO 8601; agents continue to emit `DD/MM/YYYY` in document-derived JSON because that is what the source documents carry; the case-write layer normalises before persistence                   |
-| **A5**  | Currency on the case entity                           | Denormalised header field `currency` populated at Intake from the Policy data. Agents continue to source it from the policy at reasoning time.                                                       |
-| **A6**  | `out_DetailsInquiryJSON` shape                        | A single envelope-shaped object that records originating stage, requested information, sent / response / timeout timestamps. Defined in `2-data-format/`.                                            |
-| **A7**  | Process App write-back                                | Read-only in v1. A subsequent release may add a "Reopen case" action restricted to Claims Operations Managers.                                                                                       |
-| **A8**  | Action App contract for human override                | 2-way (`continue` / `deny`) with free-text `reviewerNotes`. Notes carry any nuance that a 3-way enum would have expressed.                                                                           |
-| **A9**  | Storage Bucket access pattern                         | Apps read by short-lived signed URLs (`GetReadUri`); buckets are not directly exposed.                                                                                                               |
-| **A10** | Audit export                                          | A "Download audit record" action in the Process App produces a single JSON containing every check, summary, decision, and reviewer note for the case.                                                |
+| #       | Decision                                              | Resolution                                                                                                                                                                                                                                                                                                                                            |
+| ------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A1**  | IXP extractor type for the Claim Form                 | **Resolved: Generative Extractor.** No model training overhead; tolerates document variation. Applies only to the Claim Form — the Policy and Incident Report are read directly by agents (see §9.2 note and `CONFIG.md` §8).                                                                                                                          |
+| **A2**  | Email connector through Integration Service           | **Resolved: Gmail connector** (UiPath Integration Service). Sender per environment; in Dev / Test, all mail is routed to a mock inbox. See `CONFIG.md` §4.                                                                                                                                                                                            |
+| **A3**  | LLM model assignment per agent                        | **Resolved: model IDs are configuration, not prompt content.** `CONFIG.md` §1 defines two roles (`default_model`, `reasoning_model`) and a per-agent assignment. Prompts reference roles symbolically. Coverage Analysis (03), Credibility Assessment (05), and Decision (06) use the reasoning model; the rest use the default.                       |
+| **A4**  | Date formats                                          | **Resolved: ISO 8601 on the case entity; `DD/MM/YYYY` in agent JSON inputs / outputs.** Agents read whatever format the source documents carry; the case-write layer normalises. The synthetic-document generator currently emits `DD/MM/YYYY` and is the lever for any future format change. See `CONFIG.md` §5.                                       |
+| **A5**  | Currency on the case entity                           | **Resolved: denormalised header field `currency`** populated at Intake from the Policy data. Agents continue to source it from the policy at reasoning time. No FX conversion anywhere (see `CONFIG.md` §6).                                                                                                                                          |
+| **A6**  | `out_DetailsInquiryJSON` shape                        | **Resolved: a single envelope-shaped object** that records originating stage, requested information, sent / response / timeout timestamps. Defined in `2-data-format/`.                                                                                                                                                                                |
+| **A7**  | Process App write-back                                | **Resolved: read-only in v1.** A subsequent release may add a "Reopen case" action restricted to Claims Operations Managers.                                                                                                                                                                                                                          |
+| **A8**  | Action App contract for human override                | **Resolved: 2-way (`continue` / `deny`) with free-text `reviewerNotes`** at both escalation points (eligibility and decision). The reviewer's `reviewerNotes` is **propagated as an input to all downstream agents**; agents treat the human decision as authoritative and must not re-raise concerns the reviewer has resolved (see `CONFIG.md` §10). |
+| **A9**  | Storage Bucket access                                 | **Resolved.** UiPath built-in Storage Bucket activities serve agents and robots. Coded Apps use short-lived signed URLs via `GetReadUri` for the React PDF viewer (Apps cannot use the same server-side API). Buckets are never directly exposed.                                                                                                      |
+| **A10** | Audit export                                          | **Resolved: no separate audit-export pipeline.** Every check, evidence record, summary, decision, and reviewer note is stored in Data Fabric on `PropertyClaimCase`. The Process App provides search and filter; auditors review individual records there. See `CONFIG.md` §13.                                                                        |
+
+Locked: A1–A10 as of 2026-05-27.
 
 ---
 
